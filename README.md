@@ -97,8 +97,6 @@ fixed price formation. I stopped tuning there rather than adjust the simulation 
 market "won." The data is simulated. A real deployment would need a few dozen resolved
 features before the track record becomes reliable.
 
-![Wealth vs. skill](results/wealth_vs_skill.png)
-
 ## Copilot integration (MCP)
 
 `mcp_server.py` exposes the exchange to any MCP-compatible assistant:
