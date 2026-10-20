@@ -1,0 +1,483 @@
+<title>Backlog Exchange</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a trading desk for a product backlog. Market board on the left, sprint planner and leaderboard docked right; the study sits below. */
+:root {
+  --bg: #f3f4f1;
+  --panel: #ffffff;
+  --ink: #15202b;
+  --ink-2: #4d5761;
+  --ink-3: #7b848c;
+  --line: #dde0dc;
+  --line-2: #ebede9;
+  --accent: #1f5f8b;        /* ink blue: interactive, selection */
+  --yes: #2a78d6;           /* YES side */
+  --no: #d95926;            /* NO side */
+  --yes-soft: #e3eefb;
+  --no-soft: #fbe9e1;
+  --good: #1a7f4e;
+  --chip: #eef0ec;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12171c; --panel: #1a2128; --ink: #e8ecee; --ink-2: #b4bcc3; --ink-3: #87909a;
+    --line: #2c353e; --line-2: #232b33; --accent: #7fb3dd; --yes: #4a92e8; --no: #e8763f;
+    --yes-soft: #1d2e44; --no-soft: #3a2519; --good: #4fc28a; --chip: #232b33; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12171c; --panel: #1a2128; --ink: #e8ecee; --ink-2: #b4bcc3; --ink-3: #87909a;
+  --line: #2c353e; --line-2: #232b33; --accent: #7fb3dd; --yes: #4a92e8; --no: #e8763f;
+  --yes-soft: #1d2e44; --no-soft: #3a2519; --good: #4fc28a; --chip: #232b33; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* header */
+header { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: end; justify-content: space-between; }
+.brand h1 { font-family: var(--display); font-weight: 700; font-size: clamp(28px, 4vw, 40px); line-height: 1; margin: 0; letter-spacing: -0.02em; }
+.brand p { margin: 8px 0 0; color: var(--ink-2); max-width: 60ch; text-wrap: pretty; }
+.desk { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.desk label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+.desk select { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; min-width: 0; }
+.wallet { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; display: flex; gap: 8px; align-items: baseline; }
+.wallet span:first-child { font-size: 12px; color: var(--ink-3); }
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 7px 12px; font-weight: 500; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.btn.primary:hover { filter: brightness(1.08); }
+
+/* main grid */
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+@media (max-width: 960px) { .main { grid-template-columns: minmax(0, 1fr); } }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+.section-head h2 { font-family: var(--display); font-weight: 500; font-size: 19px; margin: 0; }
+.section-head .hint { color: var(--ink-3); font-size: 12.5px; }
+
+/* market board */
+.board { display: grid; gap: 10px; }
+.mkt { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; display: grid; gap: 12px; }
+.mkt.resolved { opacity: 0.72; }
+.mkt-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 20px; align-items: start; }
+.ticker { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.04em; }
+.mkt h3 { margin: 2px 0 2px; font-size: 15.5px; font-weight: 600; text-wrap: balance; }
+.metric { color: var(--ink-2); font-size: 13px; }
+.metric b { font-weight: 500; color: var(--ink-3); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; margin-right: 6px; }
+.quote { text-align: right; display: grid; gap: 2px; justify-items: end; }
+.quote .p { font-family: var(--mono); font-size: 28px; font-weight: 500; line-height: 1; color: var(--yes); font-variant-numeric: tabular-nums; }
+.quote .p small { font-size: 13px; color: var(--ink-3); margin-left: 2px; }
+.quote .lbl { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; color: var(--ink-2); font-size: 12.5px; }
+.chip { background: var(--chip); border-radius: 4px; padding: 2px 7px; font-size: 11.5px; color: var(--ink-2); }
+.chip.status-yes { background: var(--yes-soft); color: var(--yes); font-weight: 600; }
+.chip.status-no { background: var(--no-soft); color: var(--no); font-weight: 600; }
+.mkt-mid { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 16px; align-items: center; }
+@media (max-width: 560px) { .mkt-mid { grid-template-columns: minmax(0, 1fr); } }
+.spark { width: 100%; height: 44px; display: block; }
+.bar { position: relative; height: 26px; border-radius: 5px; overflow: hidden; background: var(--no-soft); }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--yes-soft); border-right: 2px solid var(--yes); transition: width .35s ease; }
+.bar .cons { position: absolute; top: -2px; bottom: -2px; width: 0; border-left: 2px dashed var(--ink-2); }
+.bar .tag { position: absolute; top: 50%; transform: translateY(-50%); font-family: var(--mono); font-size: 11px; font-weight: 500; }
+.bar .tag.y { left: 8px; color: var(--yes); }
+.bar .tag.n { right: 8px; color: var(--no); }
+.legend-line { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; display: flex; gap: 14px; flex-wrap: wrap; }
+.legend-line i { display: inline-block; width: 14px; border-top: 2px dashed var(--ink-2); vertical-align: middle; margin-right: 5px; }
+.trade { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; border-top: 1px solid var(--line-2); padding-top: 12px; }
+.trade label { font-size: 12.5px; color: var(--ink-2); }
+.trade input[type=range] { width: 150px; accent-color: var(--accent); }
+.trade .belief { font-family: var(--mono); width: 3.6em; display: inline-block; }
+.trade .spacer { flex: 1; }
+.btn.yes { color: var(--yes); border-color: color-mix(in srgb, var(--yes) 40%, var(--line)); }
+.btn.no { color: var(--no); border-color: color-mix(in srgb, var(--no) 40%, var(--line)); }
+.btn.small { padding: 5px 10px; font-size: 12.5px; }
+.resolve { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--ink-3); }
+
+/* side panels */
+.side { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 960px) { .side { position: static; } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: grid; gap: 12px; }
+.panel h2 { font-family: var(--display); font-weight: 500; font-size: 17px; margin: 0; }
+.cap { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ink-2); }
+.cap input { flex: 1; accent-color: var(--accent); min-width: 0; }
+.ev-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ev { border: 1px solid var(--line-2); border-radius: 6px; padding: 10px; }
+.ev .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+.ev .v { font-family: var(--mono); font-size: 18px; font-weight: 500; }
+.ev.win { border-color: color-mix(in srgb, var(--good) 45%, var(--line)); }
+.ev.win .v { color: var(--good); }
+.plan-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.plan-list li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: baseline; font-size: 13px; }
+.plan-list .pts { font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); }
+.plan-list .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rank-note { font-size: 12px; color: var(--ink-3); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); padding: 0 0 6px; }
+td { padding: 6px 0; border-top: 1px solid var(--line-2); }
+td.r, th.r { text-align: right; }
+.me td { font-weight: 600; }
+.pos { color: var(--good); }
+.neg { color: var(--no); }
+
+/* study */
+.study { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 20px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; }
+@media (max-width: 860px) { .study { grid-template-columns: minmax(0, 1fr); } }
+.study h2 { font-family: var(--display); font-weight: 500; font-size: 22px; margin: 0 0 8px; text-wrap: balance; }
+.study p { color: var(--ink-2); margin: 0 0 10px; max-width: 62ch; }
+.chart-wrap { overflow-x: auto; }
+.chart-wrap svg { display: block; width: 100%; min-width: 420px; height: auto; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 9px 14px; border-radius: 6px; font-size: 13px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: calc(100% - 32px); }
+.toast.show { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .bar .fill, .toast { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>Backlog Exchange</h1>
+      <p>Your team bets virtual tokens on which features will hit their success metric. Prices become probabilities, and the sprint plan reorders around them. Example workspace: a note-taking app's product team.</p>
+    </div>
+    <div class="desk">
+      <label for="trader">Trading as</label>
+      <select id="trader"></select>
+      <div class="wallet"><span>Tokens</span><span class="num" id="balance">0</span></div>
+      <button class="btn primary" id="teamTrade">Let the team trade</button>
+      <button class="btn" id="reset">Reset</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <section aria-labelledby="board-h">
+      <div class="section-head">
+        <h2 id="board-h">Open markets</h2>
+        <span class="hint">Set your probability and trade the market toward it. YES pays 1 token if the metric is hit.</span>
+      </div>
+      <div class="board" id="board"></div>
+    </section>
+
+    <aside class="side">
+      <div class="panel" aria-labelledby="sprint-h">
+        <h2 id="sprint-h">Sprint plan</h2>
+        <div class="cap"><label for="capacity">Capacity</label><input type="range" id="capacity" min="8" max="40" value="20"><span class="num" id="capVal">20 pts</span></div>
+        <div class="ev-compare">
+          <div class="ev win"><div class="k">Market plan</div><div class="v" id="evMarket">€0</div></div>
+          <div class="ev"><div class="k">By raw value</div><div class="v" id="evNaive">€0</div></div>
+        </div>
+        <ul class="plan-list" id="plan"></ul>
+        <div class="rank-note" id="planNote"></div>
+      </div>
+      <div class="panel" aria-labelledby="lb-h">
+        <h2 id="lb-h">Forecaster leaderboard</h2>
+        <table><thead><tr><th>Member</th><th>Role</th><th class="r">Value</th><th class="r">Return</th></tr></thead><tbody id="leaders"></tbody></table>
+        <div class="rank-note">Value is cash plus open positions at current prices. Good forecasters gain tokens, so their view counts more in the consensus.</div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="study" aria-labelledby="study-h">
+    <div>
+      <h2 id="study-h">Does a market beat how teams usually decide?</h2>
+      <p>I simulated 30 product teams over 40 sprints. Each member gets a noisy read on every feature's true chance of success. Some are sharp, some are guessing, feature owners are optimistic about their own ideas, and meetings drift toward whatever the manager says first.</p>
+      <p>The market price matched an anonymous independent vote. The track-record consensus, which weights each person's stated probability by tokens earned from past accuracy, cut forecast error by 22% against that vote and by 88% against letting the manager decide.</p>
+      <p>Final token balances correlated −0.71 with forecasting noise, so the market moves influence toward the people who read users best.</p>
+    </div>
+    <div class="chart-wrap" id="studyChart" role="img" aria-label="Bar chart of forecast error by decision method"></div>
+  </section>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+// ---------- LMSR market maker (same math as exchange/lmsr.py) ----------
+const lse = xs => { const m = Math.max(...xs); return m + Math.log(xs.reduce((s, x) => s + Math.exp(x - m), 0)); };
+class LMSR {
+  constructor(b = 80, q = [0, 0]) { this.b = b; this.q = q.slice(); }
+  cost(q = this.q) { return this.b * lse(q.map(x => x / this.b)); }
+  price(i) { const z = this.q.map(x => x / this.b), m = Math.max(...z), e = z.map(x => Math.exp(x - m)); return e[i] / (e[0] + e[1]); }
+  quote(i, d) { const q = this.q.slice(); q[i] += d; return this.cost(q) - this.cost(); }
+  sharesForBudget(i, budget) {
+    const z = this.q.map(x => x / this.b), m = Math.max(...z), tot = z.reduce((s, x) => s + Math.exp(x - m), 0);
+    const others = tot - Math.exp(z[i] - m);
+    return this.b * (Math.log(tot * Math.exp(budget / this.b) - others) + m) - this.q[i];
+  }
+  sharesToReach(i, p) {
+    const z = this.q.map(x => x / this.b), m = Math.max(...z);
+    const others = z.reduce((s, x, j) => j === i ? s : s + Math.exp(x - m), 0);
+    return this.b * (Math.log(p * others / (1 - p)) + m) - this.q[i];
+  }
+  execute(i, d) { const c = this.quote(i, d); this.q[i] += d; return c; }
+}
+
+// ---------- demo workspace (mirrors exchange/demo.py) ----------
+const TEAM = [["Marta","product manager"],["Jordi","backend engineer"],["Aiko","designer"],["Sam","data analyst"],["Lucía","frontend engineer"],["Omar","growth lead"]];
+const BACKLOG = [
+  {id:"NOTE-101", title:"Offline sync rewrite", metric:"Sync-error support tickets down 40% in 4 weeks", value:120000, effort:13, owner:"Jordi"},
+  {id:"NOTE-102", title:"AI meeting summaries", metric:"15% of weekly active users try it in 30 days", value:90000, effort:8, owner:"Marta"},
+  {id:"NOTE-103", title:"Annual plan price test (€59 to €69)", metric:"Revenue per visitor +5% with churn flat", value:150000, effort:3, owner:"Omar"},
+  {id:"NOTE-104", title:"Onboarding checklist", metric:"Day-7 retention +2 points", value:70000, effort:5, owner:"Aiko"},
+  {id:"NOTE-105", title:"Dark mode", metric:"App rating +0.1 within 6 weeks", value:20000, effort:3, owner:"Lucía"},
+  {id:"NOTE-106", title:"Shared workspaces for teams", metric:"200 paying teams within 60 days", value:110000, effort:13, owner:"Marta"},
+  {id:"NOTE-107", title:"Faster search index", metric:"Search latency p95 under 300 ms and +3% search usage", value:40000, effort:5, owner:"Jordi"},
+  {id:"NOTE-108", title:"Referral rewards", metric:"8% of new signups from referrals", value:60000, effort:5, owner:"Omar"},
+];
+const BELIEFS = {
+  "NOTE-101":[.70,.85,.60,.65,.70,.55], "NOTE-102":[.80,.45,.60,.40,.50,.55], "NOTE-103":[.50,.45,.40,.60,.45,.75],
+  "NOTE-104":[.55,.50,.75,.50,.55,.60], "NOTE-105":[.30,.35,.50,.25,.65,.30], "NOTE-106":[.65,.30,.40,.30,.35,.45],
+  "NOTE-107":[.60,.80,.55,.70,.65,.50], "NOTE-108":[.45,.40,.45,.35,.40,.70],
+};
+const fmtEUR = v => "€" + Math.round(v).toLocaleString("en-US");
+const pct = p => (p * 100).toFixed(0);
+
+function rng(seed) { return () => { seed = (seed * 1664525 + 1013904223) % 4294967296; return seed / 4294967296; }; }
+
+let S; // state
+function newState() {
+  const st = { traders: {}, markets: {} };
+  TEAM.forEach(([n, r]) => st.traders[n] = { name: n, role: r, balance: 1000, start: 1000 });
+  BACKLOG.forEach(f => st.markets[f.id] = { f, amm: new LMSR(80), pos: {}, beliefs: {}, hist: [0.5], status: "open", res: null });
+  const rand = rng(3), order = [];
+  TEAM.forEach((_, i) => BACKLOG.forEach(f => order.push([i, f.id])));
+  for (let r = 0; r < 10; r++) {
+    order.sort(() => rand() - 0.5);
+    order.forEach(([i, id]) => {
+      const b = BELIEFS[id][i], gap = Math.abs(b - st.markets[id].amm.price(0));
+      tradeToBelief(st, TEAM[i][0], id, b, 60 * gap / (1 + r), true);
+    });
+  }
+  Object.values(st.markets).forEach(m => m.hist = [0.5, m.amm.price(0)]);
+  return st;
+}
+
+function buy(st, trader, id, side, budget, quiet) {
+  const t = st.traders[trader], m = st.markets[id];
+  if (m.status !== "open" || budget <= 0.005) return false;
+  budget = Math.min(budget, t.balance);
+  if (budget <= 0.005) return false;
+  const d = m.amm.sharesForBudget(side, budget), c = m.amm.execute(side, d);
+  t.balance -= c;
+  (m.pos[trader] ||= [0, 0])[side] += d;
+  if (!quiet) m.hist.push(m.amm.price(0));
+  return c;
+}
+function tradeToBelief(st, trader, id, belief, maxSpend, quiet) {
+  const m = st.markets[id];
+  belief = Math.min(Math.max(belief, 0.01), 0.99);
+  m.beliefs[trader] = belief;
+  const p = m.amm.price(0);
+  if (Math.abs(belief - p) < 1e-4) return 0;
+  const side = belief > p ? 0 : 1, target = side === 0 ? belief : 1 - belief;
+  const needed = m.amm.quote(side, m.amm.sharesToReach(side, target));
+  return buy(st, trader, id, side, Math.min(needed, maxSpend), quiet);
+}
+function portfolio(st, name) {
+  let v = st.traders[name].balance;
+  Object.values(st.markets).forEach(m => {
+    if (m.status === "open" && m.pos[name]) { const p = m.amm.price(0); v += m.pos[name][0] * p + m.pos[name][1] * (1 - p); }
+  });
+  return v;
+}
+function consensus(st, id) {
+  const m = st.markets[id]; let tw = 0, s = 0;
+  for (const [n, b] of Object.entries(m.beliefs)) { const w = Math.max(portfolio(st, n), 0); tw += w; s += w * b; }
+  return tw > 0 ? s / tw : m.amm.price(0);
+}
+function resolve(st, id, success) {
+  const m = st.markets[id], win = success ? 0 : 1;
+  for (const [n, pos] of Object.entries(m.pos)) st.traders[n].balance += pos[win];
+  m.status = "resolved"; m.res = win;
+}
+
+// ---------- sprint planning: 0/1 knapsack on expected value ----------
+function rankOpen(st) {
+  return Object.values(st.markets).filter(m => m.status === "open").map(m => {
+    const p = m.amm.price(0), ev = p * m.f.value; return { ...m.f, p, ev, score: ev / m.f.effort };
+  }).sort((a, b) => b.score - a.score);
+}
+function knapsack(items, cap) {
+  const n = items.length, best = Array.from({ length: n + 1 }, () => new Array(cap + 1).fill(0));
+  for (let i = 1; i <= n; i++) for (let c = 0; c <= cap; c++) {
+    best[i][c] = best[i - 1][c];
+    const it = items[i - 1]; if (it.effort <= c) best[i][c] = Math.max(best[i][c], best[i - 1][c - it.effort] + it.ev);
+  }
+  const chosen = []; let c = cap;
+  for (let i = n; i > 0; i--) if (best[i][c] !== best[i - 1][c]) { chosen.push(items[i - 1]); c -= items[i - 1].effort; }
+  return chosen.reverse();
+}
+function greedyByValue(items, cap) {
+  const out = []; let used = 0;
+  [...items].sort((a, b) => b.value - a.value).forEach(it => { if (used + it.effort <= cap) { out.push(it); used += it.effort; } });
+  return out;
+}
+
+// ---------- rendering ----------
+const $ = id => document.getElementById(id);
+const me = () => $("trader").value;
+function sparkline(hist) {
+  const w = 180, h = 44, pad = 3, n = hist.length;
+  const xs = i => pad + (n === 1 ? 0 : i * (w - 2 * pad) / (n - 1)), ys = p => pad + (1 - p) * (h - 2 * pad);
+  const pts = hist.map((p, i) => `${xs(i).toFixed(1)},${ys(p).toFixed(1)}`).join(" ");
+  const last = hist[n - 1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">
+    <line x1="0" x2="${w}" y1="${ys(0.5)}" y2="${ys(0.5)}" stroke="var(--line)" stroke-dasharray="3 3" fill="none"/>
+    <polygon points="${xs(0)},${h - pad} ${pts} ${xs(n - 1)},${h - pad}" fill="var(--yes-soft)" stroke="none"/>
+    <polyline points="${pts}" fill="none" stroke="var(--yes)" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="${xs(n - 1)}" cy="${ys(last)}" r="3.5" fill="var(--yes)" stroke="var(--panel)" stroke-width="1.5"/>
+  </svg>`;
+}
+function renderBoard() {
+  const board = $("board"); board.innerHTML = "";
+  Object.values(S.markets).forEach(m => {
+    const p = m.amm.price(0), cons = consensus(S, m.f.id), mine = m.beliefs[me()] ?? p, f = m.f;
+    const status = m.status === "open" ? `<span class="chip">Open · ${m.hist.length - 1} price moves</span>`
+      : `<span class="chip ${m.res === 0 ? "status-yes" : "status-no"}">${m.res === 0 ? "Hit its metric" : "Missed its metric"}</span>`;
+    const held = m.pos[me()] || [0, 0];
+    const el = document.createElement("article");
+    el.className = "mkt" + (m.status === "open" ? "" : " resolved");
+    el.innerHTML = `
+      <div class="mkt-top">
+        <div style="min-width:0">
+          <div class="ticker">${f.id} · owner ${f.owner}</div>
+          <h3>${f.title}</h3>
+          <div class="metric"><b>Success if</b>${f.metric}</div>
+        </div>
+        <div class="quote"><div class="p">${pct(p)}<small>%</small></div><div class="lbl">chance of success</div></div>
+      </div>
+      <div class="mkt-mid">
+        ${sparkline(m.hist)}
+        <div>
+          <div class="bar" aria-label="YES ${pct(p)} percent, consensus ${pct(cons)} percent">
+            <div class="fill" style="width:${(p * 100).toFixed(1)}%"></div>
+            <div class="cons" style="left:${(cons * 100).toFixed(1)}%"></div>
+            <span class="tag y">YES ${pct(p)}¢</span><span class="tag n">NO ${pct(1 - p)}¢</span>
+          </div>
+          <div class="legend-line"><span><i></i>Track-record consensus ${pct(cons)}%</span><span>Value ${fmtEUR(f.value)} · ${f.effort} pts · EV ${fmtEUR(p * f.value)}</span></div>
+        </div>
+      </div>
+      <div class="meta">${status}${held[0] + held[1] > 0.01 ? `<span>You hold <span class="num">${held[0].toFixed(1)}</span> YES / <span class="num">${held[1].toFixed(1)}</span> NO</span>` : ""}</div>
+      ${m.status === "open" ? `
+      <div class="trade">
+        <label for="b-${f.id}">Your view</label>
+        <input type="range" id="b-${f.id}" min="1" max="99" value="${Math.round(mine * 100)}">
+        <span class="belief num" id="bv-${f.id}">${Math.round(mine * 100)}%</span>
+        <button class="btn small" data-act="toward" data-id="${f.id}">Trade toward my view</button>
+        <button class="btn small yes" data-act="yes" data-id="${f.id}">Buy YES · 25</button>
+        <button class="btn small no" data-act="no" data-id="${f.id}">Buy NO · 25</button>
+        <span class="spacer"></span>
+        <span class="resolve">Shipped?
+          <button class="btn small" data-act="hit" data-id="${f.id}">Hit</button>
+          <button class="btn small" data-act="miss" data-id="${f.id}">Missed</button></span>
+      </div>` : ""}`;
+    board.appendChild(el);
+  });
+  board.querySelectorAll('input[type=range]').forEach(inp => inp.addEventListener("input", () => {
+    $("bv-" + inp.id.slice(2)).textContent = inp.value + "%";
+  }));
+}
+function renderSide() {
+  const cap = +$("capacity").value; $("capVal").textContent = cap + " pts";
+  const items = rankOpen(S), plan = knapsack(items, cap), naive = greedyByValue(items, cap);
+  const evP = plan.reduce((s, x) => s + x.ev, 0), evN = naive.reduce((s, x) => s + x.ev, 0);
+  $("evMarket").textContent = fmtEUR(evP); $("evNaive").textContent = fmtEUR(evN);
+  $("plan").innerHTML = plan.map(x => `<li><span class="pts">${x.effort} pts</span><span class="t" title="${x.title}">${x.title}</span><span class="num">${pct(x.p)}%</span></li>`).join("")
+    || `<li><span></span><span class="t">No open features fit this capacity.</span><span></span></li>`;
+  const used = plan.reduce((s, x) => s + x.effort, 0);
+  $("planNote").textContent = evP > evN + 0.5
+    ? `Uses ${used} of ${cap} points. Weighting value by the market's odds adds ${fmtEUR(evP - evN)} of expected value over picking the biggest-value items first.`
+    : `Uses ${used} of ${cap} points. At this capacity both approaches pick the same work.`;
+  const rows = TEAM.map(([n, r]) => ({ n, r, v: portfolio(S, n) })).sort((a, b) => b.v - a.v);
+  $("leaders").innerHTML = rows.map(x => {
+    const ret = (x.v / 1000 - 1) * 100;
+    return `<tr class="${x.n === me() ? "me" : ""}"><td>${x.n}</td><td style="color:var(--ink-3)">${x.r.split(" ")[0]}</td><td class="r num">${Math.round(x.v)}</td><td class="r num ${ret >= 0 ? "pos" : "neg"}">${ret >= 0 ? "+" : ""}${ret.toFixed(1)}%</td></tr>`;
+  }).join("");
+  $("balance").textContent = Math.round(S.traders[me()].balance);
+}
+function render() { renderBoard(); renderSide(); save(); }
+
+// ---------- study chart (results/simulation.json) ----------
+function renderStudy() {
+  const data = [["Manager decides (HiPPO)", .0422], ["Anchored meeting", .0136], ["Independent vote", .0064], ["Market price", .0064], ["Track-record consensus", .0050], ["Ideal (true skill, unknowable)", .0040]];
+  const W = 560, rowH = 34, top = 8, left = 196, right = 64, H = top + data.length * rowH + 30, max = 0.045;
+  const x = v => left + v / max * (W - left - right);
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  [0, 0.01, 0.02, 0.03, 0.04].forEach(t => {
+    s += `<line x1="${x(t)}" x2="${x(t)}" y1="${top}" y2="${H - 26}" stroke="var(--line-2)" fill="none"/>`;
+    s += `<text x="${x(t)}" y="${H - 10}" text-anchor="middle" font-size="11" fill="var(--ink-3)" font-family="IBM Plex Mono, monospace">${t.toFixed(2)}</text>`;
+  });
+  data.forEach(([label, v], i) => {
+    const y = top + i * rowH + 6, hi = label.startsWith("Market") || label.startsWith("Track");
+    s += `<text x="${left - 10}" y="${y + 13}" text-anchor="end" font-size="12.5" fill="${hi ? "var(--ink)" : "var(--ink-2)"}" font-weight="${hi ? 600 : 400}" font-family="IBM Plex Sans, sans-serif">${label}</text>`;
+    s += `<rect x="${left}" y="${y}" width="${Math.max(2, x(v) - left)}" height="20" rx="3" fill="${hi ? "var(--yes)" : "var(--line)"}"/>`;
+    s += `<text x="${x(v) + 6}" y="${y + 14}" font-size="11.5" fill="var(--ink-2)" font-family="IBM Plex Mono, monospace">${v.toFixed(4)}</text>`;
+  });
+  s += `</svg><div class="rank-note" style="margin-top:6px">Mean squared error against each feature's true success probability, sprints 11 to 40, 30 simulated teams. Lower is better.</div>`;
+  $("studyChart").innerHTML = s;
+}
+
+// ---------- persistence (per viewer, optional) ----------
+const KEY = "backlog-exchange-v1";
+function save() {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ traders: S.traders, me: me(),
+      markets: Object.fromEntries(Object.entries(S.markets).map(([k, m]) => [k, { q: m.amm.q, pos: m.pos, beliefs: m.beliefs, hist: m.hist, status: m.status, res: m.res }])) }));
+  } catch (e) {}
+}
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY)); if (!d) return null;
+    const st = newState(); st.traders = d.traders;
+    for (const [k, v] of Object.entries(d.markets)) if (st.markets[k]) Object.assign(st.markets[k], { amm: new LMSR(80, v.q), pos: v.pos, beliefs: v.beliefs, hist: v.hist, status: v.status, res: v.res });
+    return { st, me: d.me };
+  } catch (e) { return null; }
+}
+
+// ---------- events ----------
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 2400); }
+$("board").addEventListener("click", e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const id = b.dataset.id, act = b.dataset.act, m = S.markets[id];
+  if (act === "toward") {
+    const v = +$("b-" + id).value / 100, c = tradeToBelief(S, me(), id, v, 120);
+    toast(c ? `${me()} spent ${c.toFixed(1)} tokens. ${m.f.title} now at ${pct(m.amm.price(0))}%.` : `The price is already at your view, or you have no tokens left.`);
+  } else if (act === "yes" || act === "no") {
+    const c = buy(S, me(), id, act === "yes" ? 0 : 1, 25);
+    toast(c ? `Bought ${act.toUpperCase()} for ${c.toFixed(1)} tokens. Price now ${pct(m.amm.price(0))}%.` : `You don't have enough tokens.`);
+  } else if (act === "hit" || act === "miss") {
+    resolve(S, id, act === "hit");
+    toast(`${m.f.title} resolved as ${act === "hit" ? "hit" : "missed"}. Winning shares paid 1 token each.`);
+  }
+  render();
+});
+$("trader").addEventListener("change", render);
+$("capacity").addEventListener("input", renderSide);
+$("teamTrade").addEventListener("click", () => {
+  const rand = Math.random; let n = 0;
+  TEAM.forEach(([name], i) => { if (name === me()) return;
+    Object.values(S.markets).forEach(m => { if (m.status !== "open") return;
+      const base = BELIEFS[m.f.id][i] + (rand() - 0.5) * 0.12;
+      if (tradeToBelief(S, name, m.f.id, base, 15 + rand() * 25)) n++;
+    });
+  });
+  render(); toast(`The team placed ${n} trades.`);
+});
+$("reset").addEventListener("click", () => { S = newState(); render(); toast("Workspace reset to the example team."); });
+
+// boot
+const saved = load();
+S = saved ? saved.st : newState();
+$("trader").innerHTML = TEAM.map(([n, r]) => `<option value="${n}">${n} · ${r}</option>`).join("");
+$("trader").value = saved?.me && S.traders[saved.me] ? saved.me : "Sam";
+renderStudy();
+render();
+</script>
