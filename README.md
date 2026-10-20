@@ -8,7 +8,6 @@ around risk-adjusted value. It also plugs into AI copilots through MCP.
 > *"Will the onboarding checklist lift day-7 retention by 2 points?"*
 > The market says 57%. Your PM says 90%. Who should you believe? Backlog Exchange keeps score.
 
-![Forecast error by decision method](results/forecast_error.png)
 
 ## Why
 
